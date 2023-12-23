@@ -3,53 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Automatically Moving Cube Platformer</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <title>Auto-Avoidance Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <canvas id="platformerCanvas" width="800" height="400" style="border: 1px solid #000;"></canvas>
+  <canvas id="gameCanvas" width="800" height="400" style="border: 1px solid #000;"></canvas>
   <script>
-    const canvas = document.getElementById('platformerCanvas');
+    const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const player = { x: 50, y: 50, width: 20, height: 20, velocity: { x: 2, y: 0 }, speed: 3 };
-    const gravity = 0.2;
-    const jumpStrength = -5;
+    const player = { x: 50, y: 200, size: 20, speed: 3, direction: 1 };
+    const spikes = [];
 
     function drawPlayer() {
       ctx.fillStyle = 'blue';
-      ctx.fillRect(player.x, player.y, player.width, player.height);
+      ctx.fillRect(player.x, player.y, player.size, player.size);
     }
 
-    function applyGravity() {
-      if (player.y < canvas.height - player.height) {
-        player.velocity.y += gravity;
-      } else {
-        player.y = canvas.height - player.height;
-        player.velocity.y = 0;
+    function drawSpikes() {
+      ctx.fillStyle = 'red';
+      spikes.forEach(spike => {
+        ctx.beginPath();
+        ctx.moveTo(spike.x, spike.y);
+        ctx.lineTo(spike.x - 10, spike.y + 20);
+        ctx.lineTo(spike.x + 10, spike.y + 20);
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
+    function generateRandomSpikes() {
+      spikes.length = 0;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 150;
+      const spikeCount = 10;
+
+      for (let i = 0; i < spikeCount; i++) {
+        const angle = (i / spikeCount) * 2 * Math.PI;
+        const spikeX = centerX + radius * Math.cos(angle);
+        const spikeY = centerY + radius * Math.sin(angle);
+        spikes.push({ x: spikeX, y: spikeY });
       }
     }
 
-    function jump() {
-      if (player.y === canvas.height - player.height) {
-        player.velocity.y = jumpStrength;
+    function checkCollision() {
+      for (const spike of spikes) {
+        if (
+          player.x < spike.x + 10 &&
+          player.x + player.size > spike.x - 10 &&
+          player.y < spike.y + 20 &&
+          player.y + player.size > spike.y
+        ) {
+          // Collision detected, reset player position
+          player.x = 50;
+          player.y = 200;
+        }
       }
     }
 
     function update() {
-      applyGravity();
+      // Move player automatically
+      player.x += player.speed * player.direction;
 
-      // Update player position based on velocity
-      player.x += player.velocity.x;
-      player.y += player.velocity.y;
+      // Reverse direction if player reaches canvas edges
+      if (player.x < 0 || player.x + player.size > canvas.width) {
+        player.direction *= -1;
+      }
+
+      // Check for collisions
+      checkCollision();
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw spikes
+      drawSpikes();
 
       // Draw player
       drawPlayer();
 
       requestAnimationFrame(update);
     }
+
+    // Generate initial spikes
+    generateRandomSpikes();
 
     // Start the game loop
     update();
