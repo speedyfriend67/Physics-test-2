@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Player in Circular Path with Moving Spikes</title>
+  <title>Free-Moving Player with Continuous Spikes</title>
   <style>
     body {
       margin: 0;
@@ -20,12 +20,12 @@
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const player = { angle: 0, size: 20 };
+    const player = { x: canvas.width / 2, y: canvas.height / 2, size: 20 };
     let spikes = [];
     const circleCenterX = canvas.width / 2;
     const circleCenterY = canvas.height / 2;
     const circleRadius = 150;
-    const playerSpeed = 0.02;
+    const playerSpeed = 3;
 
     function drawCircle() {
       ctx.beginPath();
@@ -34,10 +34,8 @@
     }
 
     function drawPlayer() {
-      const playerX = circleCenterX + circleRadius * Math.cos(player.angle);
-      const playerY = circleCenterY + circleRadius * Math.sin(player.angle);
       ctx.fillStyle = 'blue';
-      ctx.fillRect(playerX - player.size / 2, playerY - player.size / 2, player.size, player.size);
+      ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
     }
 
     function drawSpikes() {
@@ -52,37 +50,58 @@
       });
     }
 
-    function generateRandomSpikes() {
-      spikes.length = 0;
-      const spikeCount = 10;
-
-      for (let i = 0; i < spikeCount; i++) {
-        const angle = Math.random() * 2 * Math.PI;
-        const spikeX = circleCenterX + (circleRadius + 30) * Math.cos(angle); // Spikes generated outside circle
-        const spikeY = circleCenterY + (circleRadius + 30) * Math.sin(angle);
-        spikes.push({ x: spikeX, y: spikeY, speed: Math.random() * 2 + 1 });
-      }
+    function generateRandomSpike() {
+      const angle = Math.random() * 2 * Math.PI;
+      const spikeX = circleCenterX + (circleRadius + 30) * Math.cos(angle);
+      const spikeY = circleCenterY + (circleRadius + 30) * Math.sin(angle);
+      spikes.push({ x: spikeX, y: spikeY });
     }
 
     function moveSpikes() {
       spikes.forEach(spike => {
         const angleToCenter = Math.atan2(circleCenterY - spike.y, circleCenterX - spike.x);
-        spike.x += Math.cos(angleToCenter) * spike.speed;
-        spike.y += Math.sin(angleToCenter) * spike.speed;
+        spike.x += Math.cos(angleToCenter);
+        spike.y += Math.sin(angleToCenter);
       });
     }
 
-    function update() {
-      // Move player along the circular path
-      player.angle += playerSpeed;
-
-      // Keep player angle within the range [0, 2 * Math.PI)
-      if (player.angle >= 2 * Math.PI) {
-        player.angle -= 2 * Math.PI;
+    function checkCollision() {
+      for (const spike of spikes) {
+        const distance = Math.sqrt((player.x - spike.x) ** 2 + (player.y - spike.y) ** 2);
+        if (distance < player.size / 2 + 10) {
+          // Collision detected, reset player position and spikes
+          player.x = canvas.width / 2;
+          player.y = canvas.height / 2;
+          spikes.length = 0;
+        }
       }
+    }
+
+    function update() {
+      // Move player based on arrow keys
+      if (isKeyDown.ArrowLeft) {
+        player.x -= playerSpeed;
+      } else if (isKeyDown.ArrowRight) {
+        player.x += playerSpeed;
+      } else if (isKeyDown.ArrowUp) {
+        player.y -= playerSpeed;
+      } else if (isKeyDown.ArrowDown) {
+        player.y += playerSpeed;
+      }
+
+      // Keep player within the circular path
+      const angleToCenter = Math.atan2(player.y - circleCenterY, player.x - circleCenterX);
+      player.x = circleCenterX + circleRadius * Math.cos(angleToCenter);
+      player.y = circleCenterY + circleRadius * Math.sin(angleToCenter);
+
+      // Generate spikes continuously
+      generateRandomSpike();
 
       // Move spikes towards the center
       moveSpikes();
+
+      // Check for collisions
+      checkCollision();
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -99,16 +118,18 @@
       requestAnimationFrame(update);
     }
 
-    // Generate initial spikes
-    generateRandomSpikes();
+    // Keyboard event listeners
+    const isKeyDown = {};
+    window.addEventListener('keydown', (event) => {
+      isKeyDown[event.code] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+      isKeyDown[event.code] = false;
+    });
 
     // Start the game loop
     update();
-
-    // Add click event listener to generate new spikes
-    canvas.addEventListener('click', () => {
-      generateRandomSpikes();
-    });
   </script>
 </body>
 </html>
