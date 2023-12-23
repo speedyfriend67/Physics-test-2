@@ -24,8 +24,8 @@
     let spikes = [];
     const circleCenterX = canvas.width / 2;
     const circleCenterY = canvas.height / 2;
-    const circleRadius = 150;
-    const spikeSpeed = 1;
+    const circleRadius = 200; // Increased circle size
+    const spikeSpeed = 0.5; // Adjusted spike speed
 
     function drawCircle() {
       ctx.beginPath();
@@ -35,6 +35,91 @@
 
     function drawPlayer() {
       ctx.fillStyle = 'blue';
+      ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
+    }
+
+    function drawSpikes() {
+      ctx.fillStyle = 'red';
+      spikes.forEach(spike => {
+        ctx.beginPath();
+        ctx.moveTo(spike.x, spike.y);
+        ctx.lineTo(spike.x - 10, spike.y + 20);
+        ctx.lineTo(spike.x + 10, spike.y + 20);
+        ctx.closePath();
+        ctx.fill();
+      });
+    }
+
+    function generateRandomSpike() {
+      const angle = Math.random() * 2 * Math.PI;
+      const spikeX = circleCenterX + (circleRadius + 50) * Math.cos(angle); // Adjusted spike distance
+      const spikeY = circleCenterY + (circleRadius + 50) * Math.sin(angle);
+      spikes.push({ x: spikeX, y: spikeY });
+    }
+
+    function moveSpikes() {
+      spikes.forEach(spike => {
+        const angleToPlayer = Math.atan2(player.y - spike.y, player.x - spike.x);
+        spike.x += Math.cos(angleToPlayer) * spikeSpeed;
+        spike.y += Math.sin(angleToPlayer) * spikeSpeed;
+      });
+    }
+
+    function update() {
+      // Generate spikes continuously
+      generateRandomSpike();
+
+      // Move spikes towards the player
+      moveSpikes();
+
+      // Update player's position (AI avoidance)
+      const nearestSpike = findNearestSpike();
+      if (nearestSpike) {
+        const angleToAvoid = Math.atan2(player.y - nearestSpike.y, player.x - nearestSpike.x);
+        player.x += Math.cos(angleToAvoid) * player.speed;
+        player.y += Math.sin(angleToAvoid) * player.speed;
+      }
+
+      // Keep player within the circular path
+      const angleToCenter = Math.atan2(player.y - circleCenterY, player.x - circleCenterX);
+      player.x = circleCenterX + circleRadius * Math.cos(angleToCenter);
+      player.y = circleCenterY + circleRadius * Math.sin(angleToCenter);
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw circle
+      drawCircle();
+
+      // Draw spikes
+      drawSpikes();
+
+      // Draw player
+      drawPlayer();
+
+      requestAnimationFrame(update);
+    }
+
+    function findNearestSpike() {
+      let nearestSpike = null;
+      let minDistance = Number.MAX_VALUE;
+
+      spikes.forEach(spike => {
+        const distance = Math.sqrt((player.x - spike.x) ** 2 + (player.y - spike.y) ** 2);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestSpike = spike;
+        }
+      });
+
+      return nearestSpike;
+    }
+
+    // Start the game loop
+    update();
+  </script>
+</body>
+</html>'blue';
       ctx.fillRect(player.x - player.size / 2, player.y - player.size / 2, player.size, player.size);
     }
 
