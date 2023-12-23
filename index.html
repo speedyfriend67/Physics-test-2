@@ -24,8 +24,10 @@
     let spikes = [];
     const circleCenterX = canvas.width / 2;
     const circleCenterY = canvas.height / 2;
-    const circleRadius = 200; // Increased circle size
-    const spikeSpeed = 0.5; // Adjusted spike speed
+    const circleRadius = 200;
+    let spikeSpeed = 0.5;
+    let spikeGenerationInterval = 1000; // Default interval (1 second)
+    let lastSpikeGenerationTime = 0;
 
     function drawCircle() {
       ctx.beginPath();
@@ -52,7 +54,7 @@
 
     function generateRandomSpike() {
       const angle = Math.random() * 2 * Math.PI;
-      const spikeX = circleCenterX + (circleRadius + 50) * Math.cos(angle); // Adjusted spike distance
+      const spikeX = circleCenterX + (circleRadius + 50) * Math.cos(angle);
       const spikeY = circleCenterY + (circleRadius + 50) * Math.sin(angle);
       spikes.push({ x: spikeX, y: spikeY });
     }
@@ -66,8 +68,13 @@
     }
 
     function update() {
-      // Generate spikes continuously
-      generateRandomSpike();
+      const currentTime = Date.now();
+
+      // Generate spikes based on user-defined interval
+      if (currentTime - lastSpikeGenerationTime >= spikeGenerationInterval) {
+        generateRandomSpike();
+        lastSpikeGenerationTime = currentTime;
+      }
 
       // Move spikes towards the player
       moveSpikes();
@@ -113,6 +120,12 @@
       });
 
       return nearestSpike;
+    }
+
+    // Prompt user for spike generation interval
+    const userInput = prompt('Enter spike generation interval in milliseconds (leave blank for default 1000ms):');
+    if (userInput !== null && userInput !== '') {
+      spikeGenerationInterval = parseInt(userInput, 10);
     }
 
     // Start the game loop
