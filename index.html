@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learning Cube Platformer</title>
+  <title>Automatically Moving Cube Platformer</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
 </head>
 <body>
   <canvas id="platformerCanvas" width="800" height="400" style="border: 1px solid #000;"></canvas>
   <script>
-    // Your learning and generation code would go here
-    // This example is a placeholder and not functional for learning
-
     const canvas = document.getElementById('platformerCanvas');
     const ctx = canvas.getContext('2d');
-    const player = { x: 50, y: 50, width: 20, height: 20, velocity: { x: 0, y: 0 } };
+    const player = { x: 50, y: 50, width: 20, height: 20, velocity: { x: 2, y: 0 }, speed: 3 };
     const gravity = 0.2;
     const jumpStrength = -5;
 
@@ -53,13 +50,6 @@
 
       requestAnimationFrame(update);
     }
-
-    // Handle keyboard input
-    window.addEventListener('keydown', (event) => {
-      if (event.code === 'Space') {
-        jump();
-      }
-    });
 
     // Start the game loop
     update();
