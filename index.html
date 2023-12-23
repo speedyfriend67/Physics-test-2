@@ -22,9 +22,9 @@
     const ctx = canvas.getContext('2d');
     let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3 };
     let spikes = [];
-    let circleCenterX = canvas.width / 2;
-    let circleCenterY = canvas.height / 2;
-    let circleRadius = 200;
+    const circleCenterX = canvas.width / 2;
+    const circleCenterY = canvas.height / 2;
+    const circleRadius = 200;
     let spikeSpeed = 0.5;
     let spikeGenerationInterval = 1000; // Default interval (1 second)
     let lastSpikeGenerationTime = 0;
@@ -103,8 +103,6 @@
 
       // Draw player
       drawPlayer();
-
-      requestAnimationFrame(update);
     }
 
     function findNearestSpike() {
@@ -122,21 +120,37 @@
       return nearestSpike;
     }
 
-    // Prompt user for circle size
-    const circleSizeInput = prompt('Enter circle size (leave blank for default 200):');
-    if (circleSizeInput !== null && circleSizeInput !== '') {
-      circleRadius = parseInt(circleSizeInput, 10);
+    // Keyboard event listeners
+    const isKeyDown = {};
+    window.addEventListener('keydown', (event) => {
+      isKeyDown[event.code] = true;
+    });
+
+    window.addEventListener('keyup', (event) => {
+      isKeyDown[event.code] = false;
+    });
+
+    // Update player position based on arrow keys
+    function updatePlayerPosition() {
+      if (isKeyDown.ArrowLeft) {
+        player.x -= player.speed;
+      } else if (isKeyDown.ArrowRight) {
+        player.x += player.speed;
+      } else if (isKeyDown.ArrowUp) {
+        player.y -= player.speed;
+      } else if (isKeyDown.ArrowDown) {
+        player.y += player.speed;
+      }
     }
 
-    // Prompt user for spike generation interval
-    const spikeIntervalInput = prompt('Enter spike generation interval in milliseconds (leave blank for default 1000ms):');
-    if (spikeIntervalInput !== null && spikeIntervalInput !== ‘’) {
-spikeGenerationInterval = parseInt(spikeIntervalInput, 10);
-}
+    // Start the game loop
+    function gameLoop() {
+      updatePlayerPosition();
+      update();
+      requestAnimationFrame(gameLoop);
+    }
 
-// Start the game loop
-update();
-
+    gameLoop();
   </script>
 </body>
 </html>
