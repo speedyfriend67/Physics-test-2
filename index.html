@@ -87,11 +87,6 @@
         player.y += Math.sin(angleToAvoid) * player.speed;
       }
 
-      // Keep player within the circular path
-      const angleToCenter = Math.atan2(player.y - circleCenterY, player.x - circleCenterX);
-      player.x = circleCenterX + circleRadius * Math.cos(angleToCenter);
-      player.y = circleCenterY + circleRadius * Math.sin(angleToCenter);
-
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
