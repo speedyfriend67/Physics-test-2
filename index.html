@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Click to Generate Spikes</title>
+  <title>Player in Circular Path with Moving Spikes</title>
   <style>
     body {
       margin: 0;
@@ -20,12 +20,24 @@
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const player = { x: 50, y: 200, size: 20, speed: 3, direction: 1 };
+    const player = { angle: 0, size: 20 };
     let spikes = [];
+    const circleCenterX = canvas.width / 2;
+    const circleCenterY = canvas.height / 2;
+    const circleRadius = 150;
+    const playerSpeed = 0.02;
+
+    function drawCircle() {
+      ctx.beginPath();
+      ctx.arc(circleCenterX, circleCenterY, circleRadius, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
 
     function drawPlayer() {
+      const playerX = circleCenterX + circleRadius * Math.cos(player.angle);
+      const playerY = circleCenterY + circleRadius * Math.sin(player.angle);
       ctx.fillStyle = 'blue';
-      ctx.fillRect(player.x, player.y, player.size, player.size);
+      ctx.fillRect(playerX - player.size / 2, playerY - player.size / 2, player.size, player.size);
     }
 
     function drawSpikes() {
@@ -42,48 +54,41 @@
 
     function generateRandomSpikes() {
       spikes.length = 0;
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = 150;
       const spikeCount = 10;
 
       for (let i = 0; i < spikeCount; i++) {
-        const angle = (i / spikeCount) * 2 * Math.PI;
-        const spikeX = centerX + radius * Math.cos(angle);
-        const spikeY = centerY + radius * Math.sin(angle);
-        spikes.push({ x: spikeX, y: spikeY });
+        const angle = Math.random() * 2 * Math.PI;
+        const spikeX = circleCenterX + (circleRadius + 30) * Math.cos(angle); // Spikes generated outside circle
+        const spikeY = circleCenterY + (circleRadius + 30) * Math.sin(angle);
+        spikes.push({ x: spikeX, y: spikeY, speed: Math.random() * 2 + 1 });
       }
     }
 
-    function checkCollision() {
-      for (const spike of spikes) {
-        if (
-          player.x < spike.x + 10 &&
-          player.x + player.size > spike.x - 10 &&
-          player.y < spike.y + 20 &&
-          player.y + player.size > spike.y
-        ) {
-          // Collision detected, reset player position
-          player.x = 50;
-          player.y = 200;
-        }
-      }
+    function moveSpikes() {
+      spikes.forEach(spike => {
+        const angleToCenter = Math.atan2(circleCenterY - spike.y, circleCenterX - spike.x);
+        spike.x += Math.cos(angleToCenter) * spike.speed;
+        spike.y += Math.sin(angleToCenter) * spike.speed;
+      });
     }
 
     function update() {
-      // Move player automatically
-      player.x += player.speed * player.direction;
+      // Move player along the circular path
+      player.angle += playerSpeed;
 
-      // Reverse direction if player reaches canvas edges
-      if (player.x < 0 || player.x + player.size > canvas.width) {
-        player.direction *= -1;
+      // Keep player angle within the range [0, 2 * Math.PI)
+      if (player.angle >= 2 * Math.PI) {
+        player.angle -= 2 * Math.PI;
       }
 
-      // Check for collisions
-      checkCollision();
+      // Move spikes towards the center
+      moveSpikes();
 
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw circle
+      drawCircle();
 
       // Draw spikes
       drawSpikes();
