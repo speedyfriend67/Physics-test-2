@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auto-Avoidance Game</title>
+  <title>Click to Generate Spikes</title>
   <style>
     body {
       margin: 0;
@@ -11,16 +11,17 @@
     }
     canvas {
       display: block;
+      border: 1px solid #000;
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="400" style="border: 1px solid #000;"></canvas>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const player = { x: 50, y: 200, size: 20, speed: 3, direction: 1 };
-    const spikes = [];
+    let spikes = [];
 
     function drawPlayer() {
       ctx.fillStyle = 'blue';
@@ -98,6 +99,11 @@
 
     // Start the game loop
     update();
+
+    // Add click event listener to generate new spikes
+    canvas.addEventListener('click', () => {
+      generateRandomSpikes();
+    });
   </script>
 </body>
 </html>
