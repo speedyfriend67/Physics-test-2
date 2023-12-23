@@ -22,9 +22,9 @@
     const ctx = canvas.getContext('2d');
     let player = { x: canvas.width / 2, y: canvas.height / 2, size: 20, speed: 3 };
     let spikes = [];
-    const circleCenterX = canvas.width / 2;
-    const circleCenterY = canvas.height / 2;
-    const circleRadius = 200;
+    let circleCenterX = canvas.width / 2;
+    let circleCenterY = canvas.height / 2;
+    let circleRadius = 200;
     let spikeSpeed = 0.5;
     let spikeGenerationInterval = 1000; // Default interval (1 second)
     let lastSpikeGenerationTime = 0;
@@ -122,14 +122,21 @@
       return nearestSpike;
     }
 
-    // Prompt user for spike generation interval
-    const userInput = prompt('Enter spike generation interval in milliseconds (leave blank for default 1000ms):');
-    if (userInput !== null && userInput !== '') {
-      spikeGenerationInterval = parseInt(userInput, 10);
+    // Prompt user for circle size
+    const circleSizeInput = prompt('Enter circle size (leave blank for default 200):');
+    if (circleSizeInput !== null && circleSizeInput !== '') {
+      circleRadius = parseInt(circleSizeInput, 10);
     }
 
-    // Start the game loop
-    update();
+    // Prompt user for spike generation interval
+    const spikeIntervalInput = prompt('Enter spike generation interval in milliseconds (leave blank for default 1000ms):');
+    if (spikeIntervalInput !== null && spikeIntervalInput !== ‘’) {
+spikeGenerationInterval = parseInt(spikeIntervalInput, 10);
+}
+
+// Start the game loop
+update();
+
   </script>
 </body>
 </html>
